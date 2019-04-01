@@ -1,0 +1,24 @@
+{
+  "name": "interos",
+  "version": "1.0.0",
+  "description": "Alex devops proof of concept",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo 'noop'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ORESoftware/interos.git"
+  },
+  "author": "Alexander Mills",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ORESoftware/interos/issues"
+  },
+  "homepage": "https://github.com/ORESoftware/interos#readme",
+  "dependencies": {
+    "chromedriver": "^2.46.0",
+    "express": "^4.16.4",
+    "selenium-webdriver": "^4.0.0-alpha.1"
+  }
+}
