@@ -52,8 +52,7 @@ app.get('/submit_form',(req, res) => {
   
   return driverPromise.then(async driver => {
       
-      await driver.get(url);
-      // By.xpath("//html/body/")
+      await driver.get(url);  // formerly using:  By.xpath("//html/body/")
       const pageText = await driver.findElement(By.tagName('body')).getText();
       console.log('Here is the page length:', pageText.length);
       res.status(200).end(pageText);

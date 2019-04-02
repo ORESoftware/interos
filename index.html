@@ -9,8 +9,7 @@
     Word/World Cloud coming right up
 </h1>
 
-URL that has text:
-<input id="url-text" type="text">
+<input placeholder="url goes here" id="url-text" type="text">
 <input id="url-submit" type="submit" value="Submit">
 <div id="my_canvas"></div>
 
@@ -21,8 +20,6 @@ URL that has text:
     ev.preventDefault();
 
     const url = document.getElementById('url-text').value;
-
-    console.log('inner text:', url);
 
     if (!(url && String(url).includes('://'))) {
       return alert('Please put a url in the input box.');
@@ -41,24 +38,22 @@ URL that has text:
           const tblBody = document.createElement("tbody");
 
           const countsPre = {};
-
           const words = String(v).split(/\s+/g);
 
           for (let w of words) {
+            w = String(w).toLowerCase();
             if (!countsPre[w]) {
               countsPre[w] = 0;
             }
             countsPre[w]++;
           }
 
-
           const counts = Object.keys(countsPre).sort((a, b) => {
               return countsPre[b] - countsPre[a];
             })
-            .slice(0, 100)
-            .map(k => {
-                return {key:k,value: countsPre[k]}
-              });
+            .slice(0, 100).map(k => {
+              return {key: k, value: countsPre[k]}
+            });
 
           for (let w of counts) {
 
