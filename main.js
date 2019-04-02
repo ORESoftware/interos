@@ -3,13 +3,14 @@
 const path = require('path');
 const http = require('http');
 const fs = require('fs');
-const {Builder, By, Key, until,Capabilities} = require('selenium-webdriver');
+const express = require('express');
+const {Builder, By, Key, until, Capabilities} = require('selenium-webdriver');
 
 const chromeDriver = require('chromedriver');
 const chromeCapabilities = Capabilities.chrome();
 
-chromeCapabilities.set('chromeOptions',{
-  'args': ['--headless', '--no-sandbox', 'window-size=1024,768' , '--disable-gpu']
+chromeCapabilities.set('chromeOptions', {
+  'args': ['--headless', '--no-sandbox', 'window-size=1024,768', '--disable-gpu']
 });
 
 // https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/
@@ -22,48 +23,55 @@ let driverPromise = new Builder()
   .forBrowser('chrome')
   .withCapabilities(chromeCapabilities)
   .setChromeOptions({
-    'args': [ '--headless', '--disable-gpu']
+    'args': ['--headless', '--disable-gpu']
   })
   .build();
 
 
 driverPromise.catch(e => {
-   console.error('Could not build chrome selenium driver:', e);
+  console.error('Could not build chrome selenium driver:', e);
 });
 
-const s = http.createServer((req, res) => {
+const app = express();
+
+app.get('/', (req, res) => {
+  const index = path.resolve(__dirname, 'index.html');
+  fs.createReadStream(index).pipe(res);
+});
+
+
+app.get('/submit_form',(req, res) => {
   
-  if (req.url === '/') {
-    fs.createReadStream(path.resolve(__dirname, 'index.html')).pipe(res);
-    return;
+  const url = req.query.url;
+  
+  console.log({query: req.query, body: req.body});
+  
+  if (!url) {
+    return res.status(412).end('Missing "url" body parameter.');
   }
   
-  if (req.url === '/submit_form') {
-    
-    const url = req.body.url;
-    
-    if(!url){
-      return res.end('Missing "url" body parameter.');
-    }
-    
-    return driverPromise.then(async driver => {
+  return driverPromise.then(async driver => {
       
       await driver.get(url);
-      const pageText = await driver.findElement(By.xpath("//html/body/")).getText();
-      res.end(pageText);
-  
-  
-    });
-  }
-  
-  
-  res.status = 404;
-  res.end('404');
-  
+      // By.xpath("//html/body/")
+      const pageText = await driver.findElement(By.tagName('body')).getText();
+      console.log('Here is the page length:', pageText.length);
+      res.status(200).end(pageText);
+      
+    })
+    .catch(e => {
+      console.error(e);
+      res.end(e);
+    })
+});
+
+
+app.use((req, res) => {
+  res.status(404).end('404');
 });
 
 const port = process.env.interos_port;
 
-s.listen(port, '0.0.0.0', () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`listening on port ${port}`);
 });

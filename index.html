@@ -8,9 +8,94 @@
 <h1>
     Word/World Cloud coming right up
 </h1>
-<form action="/submit_form">
-    URL that has text: <input type="text" name="url"><br>
-    <input type="submit" value="Submit">
-</form>
+
+URL that has text:
+<input id="url-text" type="text">
+<input id="url-submit" type="submit" value="Submit">
+<div id="my_canvas"></div>
+
+<script>
+
+  document.getElementById('url-submit').addEventListener('click', ev => {
+
+    ev.preventDefault();
+
+    const url = document.getElementById('url-text').value;
+
+    console.log('inner text:', url);
+
+    if (!(url && String(url).includes('://'))) {
+      return alert('Please put a url in the input box.');
+    }
+
+    fetch(encodeURI(`/submit_form?url=${url}`)).then(v => {
+
+        const canvas = document.getElementById('my_canvas');
+        while (canvas.firstChild) {
+          canvas.removeChild(canvas.firstChild);
+        }
+
+        return v.text().then(v => {
+
+          const tbl = document.createElement("table");
+          const tblBody = document.createElement("tbody");
+
+          const countsPre = {};
+
+          const words = String(v).split(/\s+/g);
+
+          for (let w of words) {
+            if (!countsPre[w]) {
+              countsPre[w] = 0;
+            }
+            countsPre[w]++;
+          }
+
+
+          const counts = Object.keys(countsPre).sort((a, b) => {
+              return countsPre[b] - countsPre[a];
+            })
+            .slice(0, 100)
+            .map(k => {
+                return {key:k,value: countsPre[k]}
+              });
+
+          for (let w of counts) {
+
+            let row = document.createElement("tr");
+
+            {
+              let cell = document.createElement("td");
+              let cellText = document.createTextNode(w.key);
+              cell.appendChild(cellText);
+              row.appendChild(cell);
+            }
+
+            {
+              let cell = document.createElement("td");
+              let cellText = document.createTextNode(w.value);
+              cell.appendChild(cellText);
+              row.appendChild(cell);
+            }
+
+
+            // add the row to the end of the table body
+            tblBody.appendChild(row);
+          }
+
+          tbl.appendChild(tblBody);
+          canvas.appendChild(tbl);
+          tbl.setAttribute("border", "1");
+
+        });
+      })
+      .catch(e => {
+        alert('Could not fetch cloud text: ' + e.message || e);
+      })
+
+  });
+
+</script>
+
 </body>
 </html>
